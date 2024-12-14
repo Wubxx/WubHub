@@ -1,0 +1,234 @@
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local CloseButton = Instance.new("TextButton")
+local TeleportButton = Instance.new("TextButton")
+local EspButton = Instance.new("TextButton")
+local TeleportMenu = Instance.new("Frame")
+local EspMenu = Instance.new("Frame")
+local MenuLabel = Instance.new("TextLabel")
+
+-- Color settings
+local colors = {
+    darkGray = Color3.fromRGB(50, 50, 50),  -- Dark gray instead of red
+    black = Color3.fromRGB(0, 0, 0),
+    gray = Color3.fromRGB(128, 128, 128),
+    white = Color3.fromRGB(255, 255, 255),
+    green = Color3.fromRGB(0, 255, 0),
+    yellow = Color3.fromRGB(255, 255, 0)
+}
+
+-- Setup ScreenGui
+ScreenGui.Name = "WubHub"  -- Changed the name
+ScreenGui.Parent = syn and game.CoreGui or game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Setup MainFrame
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = colors.gray
+MainFrame.BorderColor3 = colors.darkGray
+MainFrame.BorderSizePixel = 2
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -100)
+MainFrame.Size = UDim2.new(0, 400, 0, 300)
+MainFrame.Draggable = true
+MainFrame.Active = true
+MainFrame.Visible = true  -- Changed to true to show the UI immediately
+
+-- Style for buttons
+local function createButton(name, parent, text, position)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Parent = parent
+    button.BackgroundColor3 = colors.darkGray
+    button.TextColor3 = colors.white
+    button.Position = position
+    button.Size = UDim2.new(0, 150, 0, 50)  -- Adjusted size for better fit
+    button.Text = text
+    button.Font = Enum.Font.SourceSans
+    button.TextSize = 20
+    button.AutoButtonColor = false -- Prevent auto color change on hover
+    return button
+end
+
+-- Setup CloseButton
+CloseButton = Instance.new("TextButton")
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = MainFrame
+CloseButton.BackgroundColor3 = colors.darkGray
+CloseButton.BorderSizePixel = 0
+CloseButton.Position = UDim2.new(1, -35, 0, 5)
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Text = "X"
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.TextSize = 20
+CloseButton.AutoButtonColor = false
+CloseButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+end)
+
+-- Setup Label
+MenuLabel.Name = "MenuLabel"
+MenuLabel.Parent = MainFrame
+MenuLabel.BackgroundColor3 = colors.gray
+MenuLabel.TextColor3 = colors.white
+MenuLabel.Position = UDim2.new(0, 0, 0, 0)
+MenuLabel.Size = UDim2.new(0, 400, 0, 40)
+MenuLabel.Text = "WubHub"  -- Changed the text
+MenuLabel.Font = Enum.Font.SourceSansBold
+MenuLabel.TextSize = 24
+MenuLabel.TextWrapped = true
+
+-- Setup Teleport & ESP Buttons
+TeleportButton = createButton("TeleportButton", MainFrame, "Teleport", UDim2.new(0, 10, 0, 60))
+TeleportButton.MouseButton1Click:Connect(function()
+    TeleportMenu.Visible = not TeleportMenu.Visible
+    EspMenu.Visible = false
+end)
+
+EspButton = createButton("EspButton", MainFrame, "ESP", UDim2.new(0, 10, 0, 120))
+EspButton.MouseButton1Click:Connect(function()
+    EspMenu.Visible = not EspMenu.Visible
+    TeleportMenu.Visible = false
+end)
+
+-- Setup TeleportMenu
+TeleportMenu.Name = "TeleportMenu"
+TeleportMenu.Parent = MainFrame
+TeleportMenu.BackgroundColor3 = colors.gray
+TeleportMenu.Position = UDim2.new(0, 180, 0, 60)  -- Positioned to the right
+TeleportMenu.Size = UDim2.new(0, 200, 0, 230)
+TeleportMenu.Visible = false
+
+-- Setup ESP Menu
+EspMenu.Name = "EspMenu"
+EspMenu.Parent = MainFrame
+EspMenu.BackgroundColor3 = colors.gray
+EspMenu.Position = UDim2.new(0, 180, 0, 60)  -- Positioned to the right
+EspMenu.Size = UDim2.new(0, 200, 0, 230)
+EspMenu.Visible = false
+
+-- Create Teleport Buttons
+local items = {"Shotgun", "Shells", "Medkit", "Food", "Bat", "Crowbar", "Hammer", "Soda"}
+
+for i, item in ipairs(items) do
+    local Button = Instance.new("TextButton")
+    Button.Parent = TeleportMenu
+    Button.BackgroundColor3 = colors.white
+    Button.Size = UDim2.new(0, 180, 0, 30)
+    Button.Position = UDim2.new(0, 10, 0, (i - 1) * 35)
+    Button.Text = item
+    Button.Font = Enum.Font.SourceSans
+    Button.TextSize = 16
+    Button.MouseButton1Click:Connect(function()
+        local rootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
+        local itemLocation = game:GetService("Workspace").Pickups[item]
+        if itemLocation then
+            rootPart.CFrame = itemLocation.CFrame
+        end
+    end)
+end
+
+-- Create ESP Buttons
+local espButtons = {"Esp Gefs", "Esp Menu Players"}
+
+for i, espLabel in ipairs(espButtons) do
+    local Button = Instance.new("TextButton")
+    Button.Parent = EspMenu
+    Button.BackgroundColor3 = colors.white
+    Button.Size = UDim2.new(0, 180, 0, 30)
+    Button.Position = UDim2.new(0, 10, 0, (i - 1) * 35)
+    Button.Text = espLabel
+    Button.Font = Enum.Font.SourceSans
+    Button.TextSize = 16
+
+    if espLabel == "Esp Gefs" then
+        Button.MouseButton1Click:Connect(function()
+            local espEnabled = true
+            
+            local function createESPForHurtbox(part)
+                local espGui = Instance.new("BillboardGui", part)
+                espGui.Adornee = part
+                espGui.Size = UDim2.new(0, 200, 0, 50)
+                espGui.AlwaysOnTop = true
+                espGui.StudsOffset = Vector3.new(0, 3, 0)
+
+                local nameLabel = Instance.new("TextLabel", espGui)
+                nameLabel.Text = "GEF"
+                nameLabel.BackgroundTransparency = 1
+                nameLabel.Size = UDim2.new(0, 200, 0, 20)
+                nameLabel.Font = Enum.Font.SourceSansBold
+                nameLabel.TextSize = 18
+                
+                local distanceLabel = Instance.new("TextLabel", espGui)
+                distanceLabel.BackgroundTransparency = 1
+                distanceLabel.Size = UDim2.new(0, 200, 0, 20)
+                distanceLabel.Font = Enum.Font.SourceSansBold
+                distanceLabel.TextSize = 18
+                distanceLabel.Position = UDim2.new(0, 0, 0, 20)
+
+                game:GetService("RunService").RenderStepped:Connect(function()
+                    local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - part.Position).magnitude
+                    distanceLabel.Text = string.format("Distance: %.2f", distance)
+
+                    if distance < 50 then
+                        nameLabel.TextColor3 = colors.yellow
+                        distanceLabel.TextColor3 = colors.yellow
+                    elseif distance < 100 then
+                        nameLabel.TextColor3 = colors.green
+                        distanceLabel.TextColor3 = colors.green
+                    else
+                        nameLabel.TextColor3 = colors.white
+                        distanceLabel.TextColor3 = colors.white
+                    end
+                end)
+            end
+
+            local function toggleESP()
+                while espEnabled do
+                    for _, part in pairs(workspace:GetDescendants()) do
+                        if part:IsA("BasePart") and part.Name == "Hurtbox" and not part:FindFirstChildOfClass("BillboardGui") then
+                            createESPForHurtbox(part)
+                        end
+                    end
+                    wait(60)
+                end
+            end
+
+            toggleESP()
+        end)
+    elseif espLabel == "Esp Menu Players" then
+        Button.MouseButton1Click:Connect(function()
+            loadstring(game:HttpGet("https://pastebin.com/raw/USEXe42D"))()
+        end)
+    end
+end
+
+-- Adjust button UI when hovered
+for _, button in ipairs({TeleportButton, EspButton, CloseButton}) do
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(80, 80, 80) -- Darker gray on hover
+    end)
+    
+    button.MouseLeave:Connect(function()
+        button.BackgroundColor3 = colors.darkGray
+    end)
+end
+
+-- Separator function
+local function createSeparator(parent, position)
+    local Separator = Instance.new("Frame")
+    Separator.Parent = parent
+    Separator.BackgroundColor3 = colors.darkGray
+    Separator.Size = UDim2.new(0, 180, 0, 2)
+    Separator.Position = position
+end
+
+-- Create separators in TeleportMenu and EspMenu
+for i = 1, 8 do
+    createSeparator(TeleportMenu, UDim2.new(0, 10, 0, (i * 35) - 3))
+end
+
+for i = 1, 2 do
+    createSeparator(EspMenu, UDim2.new(0, 10, 0, (i * 35) - 3))
+end
