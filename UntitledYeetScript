@@ -1,0 +1,187 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Color settings
+local colors = {
+    darkGray = Color3.fromRGB(50, 50, 50),
+    black = Color3.fromRGB(0, 0, 0),
+    gray = Color3.fromRGB(128, 128, 128),
+    white = Color3.fromRGB(255, 255, 255),
+    green = Color3.fromRGB(0, 255, 0),
+    yellow = Color3.fromRGB(255, 255, 0)
+}
+
+-- Function to create ESP label
+local function createESPLabel(player)
+    local head = player.Character and player.Character:FindFirstChild("Head")
+    if not head then return end
+
+    local espLabel = Instance.new("BillboardGui")
+    espLabel.Adornee = head
+    espLabel.Size = UDim2.new(0, 200, 0, 50)
+    espLabel.AlwaysOnTop = true
+    espLabel.ExtentsOffset = Vector3.new(0, 2, 0)
+
+    local textLabel = Instance.new("TextLabel", espLabel)
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextColor3 = colors.white
+    textLabel.TextStrokeTransparency = 0
+    textLabel.TextScaled = true
+    textLabel.Text = player.Name .. " - Inf studs"
+
+    return espLabel
+end
+
+-- Table to keep track of ESP labels
+local espLabels = {}
+
+-- Enable/Disable ESP
+local function toggleESP(enabled)
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            if enabled then
+                if not espLabels[player.UserId] then
+                    local espLabel = createESPLabel(player)
+                    espLabel.Parent = player.Character.Head
+                    espLabels[player.UserId] = espLabel
+                end
+            else
+                if espLabels[player.UserId] then
+                    espLabels[player.UserId]:Destroy()
+                    espLabels[player.UserId] = nil
+                end
+            end
+        end
+    end
+end
+
+-- Function to find players based on input
+local function gplr(String)
+    local Found = {}
+    local strl = String:lower()
+    for _, player in pairs(Players:GetPlayers()) do
+        if strl == "all" or (strl == "others" and player.Name ~= LocalPlayer.Name) or (strl == "me" and player.Name == LocalPlayer.Name) then
+            table.insert(Found, player)
+        elseif player.Name:lower():sub(1, #String) == strl then
+            table.insert(Found, player)
+        end
+    end
+    return Found 
+end
+
+-- GUI Setup
+local function createGUI()
+    local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    gui.ResetOnSpawn = false
+
+    local mainFrame = Instance.new("Frame", gui)
+    mainFrame.BackgroundColor3 = colors.gray
+    mainFrame.BorderColor3 = colors.darkGray
+    mainFrame.BorderSizePixel = 2
+    mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    mainFrame.Size = UDim2.new(0, 400, 0, 300)
+    mainFrame.Draggable = true
+    mainFrame.Active = true
+    mainFrame.Visible = true
+
+    -- Title Label
+    local titleLabel = Instance.new("TextLabel", mainFrame)
+    titleLabel.Size = UDim2.new(1, 0, 0, 40)
+    titleLabel.BackgroundColor3 = colors.gray  -- Changed to match the main UI color
+    titleLabel.TextColor3 = colors.white
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.Text = "WubHub"  -- Title text
+    titleLabel.TextScaled = true
+    titleLabel.TextWrapped = true
+
+    local notificationLabel = Instance.new("TextLabel", mainFrame)
+    notificationLabel.Size = UDim2.new(0.8, 0, 0, 30)
+    notificationLabel.Position = UDim2.new(0.1, 0, 0.15, 0)
+    notificationLabel.BackgroundTransparency = 1
+    notificationLabel.TextColor3 = colors.white
+    notificationLabel.TextScaled = true
+    notificationLabel.Text = ""
+
+    -- Helper function to create buttons
+    local function createButton(name, parent, text, position)
+        local button = Instance.new("TextButton")
+        button.Name = name
+        button.Parent = parent
+        button.BackgroundColor3 = colors.darkGray
+        button.TextColor3 = colors.white
+        button.Position = position
+        button.Size = UDim2.new(0, 150, 0, 50)
+        button.Text = text
+        button.Font = Enum.Font.SourceSans
+        button.TextSize = 20
+        button.AutoButtonColor = false
+        return button
+    end
+
+    -- ESP Toggle Button
+    local espToggleButton = createButton("EspToggleButton", mainFrame, "Toggle ESP", UDim2.new(0.1, 0, 0.25, 0))
+    espToggleButton.MouseButton1Click:Connect(function()
+        local espEnabled = espToggleButton.Text == "Toggle ESP"
+        if espEnabled then
+            toggleESP(true)
+            espToggleButton.Text = "Disable ESP"
+            notificationLabel.Text = "ESP Enabled"
+        else
+            toggleESP(false)
+            espToggleButton.Text = "Toggle ESP"
+            notificationLabel.Text = "ESP Disabled"
+        end
+    end)
+
+    -- TextBox for Player Targeting
+    local textBox = Instance.new("TextBox", mainFrame)
+    textBox.BackgroundColor3 = colors.darkGray
+    textBox.Position = UDim2.new(0.1, 0, 0.4, 0)
+    textBox.Size = UDim2.new(0.8, 0, 0, 50)
+    textBox.PlaceholderText = "Enter player name"
+    textBox.TextColor3 = colors.white
+
+    -- Yeet Button
+    local yeetButton = createButton("YeetButton", mainFrame, "Yeet Target", UDim2.new(0.1, 0, 0.6, 0))
+    yeetButton.MouseButton1Click:Connect(function()
+        local Target = gplr(textBox.Text)
+        if Target[1] then
+            Target = Target[1]
+            local Thrust = Instance.new('BodyThrust', LocalPlayer.Character.HumanoidRootPart)
+            Thrust.Force = Vector3.new(9999, 9999, 9999)
+            Thrust.Name = "YeetForce"
+            repeat
+                LocalPlayer.Character.HumanoidRootPart.CFrame = Target.Character.HumanoidRootPart.CFrame
+                Thrust.Location = Target.Character.HumanoidRootPart.Position
+                RunService.Heartbeat:wait()
+            until not Target.Character:FindFirstChild("Head")
+            notificationLabel.Text = "Yeeted " .. Target.Name
+        else
+            notificationLabel.Text = "Invalid player"
+        end
+    end)
+
+    -- Close Button
+    local closeButton = createButton("CloseButton", mainFrame, "Close", UDim2.new(0.1, 0, 0.8, 0))
+    closeButton.MouseButton1Click:Connect(function()
+        gui:Destroy()  -- Close the UI by destroying the GUI
+    end)
+
+    -- Unlock mouse functionality
+    UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+        if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.T then
+            UserInputService.MouseIconEnabled = not UserInputService.MouseIconEnabled  -- Toggle mouse visibility
+            if UserInputService.MouseIconEnabled then
+                notificationLabel.Text = "Mouse Unlocked"
+            else
+                notificationLabel.Text = "Mouse Locked"
+            end
+        end
+    end)
+end
+
+-- Create GUI when the script runs
+createGUI()
