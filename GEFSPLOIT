@@ -1,10 +1,10 @@
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
-local CloseButton = Instance.new("TextButton")
+local CloseMainButton = Instance.new("TextButton")
 local TeleportButton = Instance.new("TextButton")
 local EspButton = Instance.new("TextButton")
-local TeleportMenu = Instance.new("Frame")
-local EspMenu = Instance.new("Frame")
+local TeleportMenu = Instance.new("ScrollingFrame")
+local EspMenu = Instance.new("ScrollingFrame")
 local MenuLabel = Instance.new("TextLabel")
 
 -- Color settings
@@ -18,7 +18,7 @@ local colors = {
 }
 
 -- Setup ScreenGui
-ScreenGui.Name = "WubHub"  -- Changed the name
+ScreenGui.Name = "WubHub"
 ScreenGui.Parent = syn and game.CoreGui or game.Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -33,7 +33,7 @@ MainFrame.Position = UDim2.new(0.5, -200, 0.5, -100)
 MainFrame.Size = UDim2.new(0, 400, 0, 300)
 MainFrame.Draggable = true
 MainFrame.Active = true
-MainFrame.Visible = true  -- Changed to true to show the UI immediately
+MainFrame.Visible = true
 
 -- Style for buttons
 local function createButton(name, parent, text, position)
@@ -43,28 +43,28 @@ local function createButton(name, parent, text, position)
     button.BackgroundColor3 = colors.darkGray
     button.TextColor3 = colors.white
     button.Position = position
-    button.Size = UDim2.new(0, 150, 0, 50)  -- Adjusted size for better fit
+    button.Size = UDim2.new(0, 150, 0, 50)
     button.Text = text
     button.Font = Enum.Font.SourceSans
     button.TextSize = 20
-    button.AutoButtonColor = false -- Prevent auto color change on hover
+    button.AutoButtonColor = false
     return button
 end
 
--- Setup CloseButton
-CloseButton = Instance.new("TextButton")
-CloseButton.Name = "CloseButton"
-CloseButton.Parent = MainFrame
-CloseButton.BackgroundColor3 = colors.darkGray
-CloseButton.BorderSizePixel = 0
-CloseButton.Position = UDim2.new(1, -35, 0, 5)
-CloseButton.Size = UDim2.new(0, 30, 0, 30)
-CloseButton.Text = "X"
-CloseButton.Font = Enum.Font.SourceSansBold
-CloseButton.TextSize = 20
-CloseButton.AutoButtonColor = false
-CloseButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = false
+-- Setup Close Button for MainFrame (to destroy the GUI)
+CloseMainButton.Name = "CloseMainButton"
+CloseMainButton.Parent = MainFrame
+CloseMainButton.BackgroundColor3 = colors.darkGray
+CloseMainButton.BorderSizePixel = 0
+CloseMainButton.Position = UDim2.new(0, 10, 0, 190) -- Moved below the ESP button
+CloseMainButton.Size = UDim2.new(0, 150, 0, 50) -- Adjusted size for consistency
+CloseMainButton.Text = "Close GUI"
+CloseMainButton.Font = Enum.Font.SourceSansBold
+CloseMainButton.TextSize = 20
+CloseMainButton.AutoButtonColor = false
+CloseMainButton.ZIndex = 3 -- Set ZIndex to be in front of the main GUI
+CloseMainButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy() -- Destroy the entire GUI
 end)
 
 -- Setup Label
@@ -74,7 +74,7 @@ MenuLabel.BackgroundColor3 = colors.gray
 MenuLabel.TextColor3 = colors.white
 MenuLabel.Position = UDim2.new(0, 0, 0, 0)
 MenuLabel.Size = UDim2.new(0, 400, 0, 40)
-MenuLabel.Text = "WubHub"  -- Changed the text
+MenuLabel.Text = "WubHub"
 MenuLabel.Font = Enum.Font.SourceSansBold
 MenuLabel.TextSize = 24
 MenuLabel.TextWrapped = true
@@ -92,21 +92,55 @@ EspButton.MouseButton1Click:Connect(function()
     TeleportMenu.Visible = false
 end)
 
--- Setup TeleportMenu
+-- Setup TeleportMenu as a ScrollingFrame
 TeleportMenu.Name = "TeleportMenu"
 TeleportMenu.Parent = MainFrame
 TeleportMenu.BackgroundColor3 = colors.gray
-TeleportMenu.Position = UDim2.new(0, 180, 0, 60)  -- Positioned to the right
+TeleportMenu.Position = UDim2.new(0, 180, 0, 60)
 TeleportMenu.Size = UDim2.new(0, 200, 0, 230)
 TeleportMenu.Visible = false
+TeleportMenu.CanvasSize = UDim2.new(0, 0, 0, 300)
+TeleportMenu.ScrollBarThickness = 10
 
--- Setup ESP Menu
+-- Close Button for TeleportMenu
+local CloseTeleportButton = Instance.new("TextButton")
+CloseTeleportButton.Parent = TeleportMenu
+CloseTeleportButton.BackgroundColor3 = colors.darkGray
+CloseTeleportButton.BorderSizePixel = 0
+CloseTeleportButton.Position = UDim2.new(0.5, -15, 0, 5)
+CloseTeleportButton.Size = UDim2.new(0, 30, 0, 30)
+CloseTeleportButton.Text = "X"
+CloseTeleportButton.Font = Enum.Font.SourceSansBold
+CloseTeleportButton.TextSize = 20
+CloseTeleportButton.AutoButtonColor = false
+CloseTeleportButton.MouseButton1Click:Connect(function()
+    TeleportMenu.Visible = false
+end)
+
+-- Setup ESP Menu as a ScrollingFrame
 EspMenu.Name = "EspMenu"
 EspMenu.Parent = MainFrame
 EspMenu.BackgroundColor3 = colors.gray
-EspMenu.Position = UDim2.new(0, 180, 0, 60)  -- Positioned to the right
+EspMenu.Position = UDim2.new(0, 180, 0, 60)
 EspMenu.Size = UDim2.new(0, 200, 0, 230)
 EspMenu.Visible = false
+EspMenu.CanvasSize = UDim2.new(0, 0, 0, 100)
+EspMenu.ScrollBarThickness = 10
+
+-- Close Button for EspMenu
+local CloseEspButton = Instance.new("TextButton")
+CloseEspButton.Parent = EspMenu
+CloseEspButton.BackgroundColor3 = colors.darkGray
+CloseEspButton.BorderSizePixel = 0
+CloseEspButton.Position = UDim2.new(0.5, -15, 0, 5)
+CloseEspButton.Size = UDim2.new(0, 30, 0, 30)
+CloseEspButton.Text = "X"
+CloseEspButton.Font = Enum.Font.SourceSansBold
+CloseEspButton.TextSize = 20
+CloseEspButton.AutoButtonColor = false
+CloseEspButton.MouseButton1Click:Connect(function()
+    EspMenu.Visible = false
+end)
 
 -- Create Teleport Buttons
 local items = {"Shotgun", "Handgun", "Bullets", "Shells", "Medkit", "Food", "Bat", "Crowbar", "Hammer", "Soda"}
@@ -128,6 +162,9 @@ for i, item in ipairs(items) do
         end
     end)
 end
+
+-- Update the CanvasSize of teleport menu according to the number of items
+TeleportMenu.CanvasSize = UDim2.new(0, 0, 0, #items * 35 + 10)
 
 -- Create ESP Buttons
 local espButtons = {"Esp Gefs", "Esp Menu Players"}
@@ -199,15 +236,73 @@ for i, espLabel in ipairs(espButtons) do
         end)
     elseif espLabel == "Esp Menu Players" then
         Button.MouseButton1Click:Connect(function()
-            loadstring(game:HttpGet("https://pastebin.com/raw/USEXe42D"))()
+            local espEnabled = true
+            
+            local function createESPForPlayer(player)
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local humanoidRootPart = player.Character.HumanoidRootPart
+                    local espGui = Instance.new("BillboardGui", humanoidRootPart)
+                    espGui.Adornee = humanoidRootPart
+                    espGui.Size = UDim2.new(0, 200, 0, 50)
+                    espGui.AlwaysOnTop = true
+                    espGui.StudsOffset = Vector3.new(0, 3, 0)
+
+                    local nameLabel = Instance.new("TextLabel", espGui)
+                    nameLabel.Text = player.Name
+                    nameLabel.BackgroundTransparency = 1
+                    nameLabel.Size = UDim2.new(0, 200, 0, 20)
+                    nameLabel.Font = Enum.Font.SourceSansBold
+                    nameLabel.TextSize = 18
+
+                    local distanceLabel = Instance.new("TextLabel", espGui)
+                    distanceLabel.BackgroundTransparency = 1
+                    distanceLabel.Size = UDim2.new(0, 200, 0, 20)
+                    distanceLabel.Font = Enum.Font.SourceSansBold
+                    distanceLabel.TextSize = 18
+                    distanceLabel.Position = UDim2.new(0, 0, 0, 20)
+
+                    game:GetService("RunService").RenderStepped:Connect(function()
+                        local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - humanoidRootPart.Position).magnitude
+                        distanceLabel.Text = string.format("Distance: %.2f", distance)
+
+                        if distance < 50 then
+                            nameLabel.TextColor3 = colors.yellow
+                            distanceLabel.TextColor3 = colors.yellow
+                        elseif distance < 100 then
+                            nameLabel.TextColor3 = colors.green
+                            distanceLabel.TextColor3 = colors.green
+                        else
+                            nameLabel.TextColor3 = colors.white
+                            distanceLabel.TextColor3 = colors.white
+                        end
+                    end)
+                end
+            end
+
+            local function togglePlayerESP()
+                local players = game.Players:GetPlayers()
+                while espEnabled do
+                    for _, player in ipairs(players) do
+                        if player ~= game.Players.LocalPlayer then
+                            createESPForPlayer(player)
+                        end
+                    end
+                    wait(60)
+                end
+            end
+
+            togglePlayerESP()
         end)
     end
 end
 
+-- Update the CanvasSize of ESP menu according to the number of items
+EspMenu.CanvasSize = UDim2.new(0, 0, 0, #espButtons * 35 + 10)
+
 -- Adjust button UI when hovered
-for _, button in ipairs({TeleportButton, EspButton, CloseButton}) do
+for _, button in ipairs({TeleportButton, EspButton, CloseMainButton}) do
     button.MouseEnter:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(80, 80, 80) -- Darker gray on hover
+        button.BackgroundColor3 = Color3.fromRGB(80, 80, 80) 
     end)
     
     button.MouseLeave:Connect(function()
