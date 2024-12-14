@@ -109,7 +109,7 @@ EspMenu.Size = UDim2.new(0, 200, 0, 230)
 EspMenu.Visible = false
 
 -- Create Teleport Buttons
-local items = {"Shotgun", "Shells", "Medkit", "Food", "Bat", "Crowbar", "Hammer", "Soda"}
+local items = {"Shotgun", "Handgun", "Bullets", "Shells", "Medkit", "Food", "Bat", "Crowbar", "Hammer", "Soda"}
 
 for i, item in ipairs(items) do
     local Button = Instance.new("TextButton")
